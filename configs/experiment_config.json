@@ -1,0 +1,14 @@
+{
+    "dataset": "cifar10",
+    "seed": 69,
+    "dist": "dirichilet",
+    "clients": 5,
+    "shuffle": true,
+    "model": "resnet",
+    "ratio": 0.9,
+    "device": "cuda",
+    "save": false,
+    "training" : "configs/fedavg_training_config.json"
+
+  }
+  
