@@ -15,6 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from utils import dataset_normalization_values
 from data_dist import distribute_data_iid, distribute_data_dirichilet
+from models import Resnet18_model
 
 
 cwd = os.getcwd()
@@ -126,3 +127,12 @@ elif distribution == 'iid' :
         shuffle=shuffle
     )
 print('Data Distribution is done')
+
+
+
+models = {
+    i : Resnet18_model(in_channels=dataset.data.shape[-1], 
+                       num_classes=num_classes
+                       ) for i in range(num_clients)
+}
+print('models initialized')
