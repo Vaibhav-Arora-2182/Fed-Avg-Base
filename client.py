@@ -5,7 +5,7 @@ import torchvision
 import torch.nn as nn
 import json 
 from abc import ABC
-from typing import Tuple
+from typing import Tuple, Union
 
 from torch.utils.data import DataLoader, Subset, Dataset, random_split
 from torch.utils.tensorboard import SummaryWriter
@@ -26,7 +26,7 @@ class BaseClient(ABC):
                  device : str,
                  model : nn.Module,
                  ratio : float,
-                 shuffle : bool or torch.device,
+                 shuffle : Union[torch.device, bool],
                  train_config : str
                  ) -> None:
         super().__init__()
@@ -51,7 +51,7 @@ class BaseClient(ABC):
 
         self._parse_train_config()
         self.train_loader, self.test_loader = self._split_data()
-        self.local_train(5)
+        # self.local_train(5)
 
 
 
@@ -153,7 +153,7 @@ class FedAvgClient(BaseClient):
     
     def local_train(self, num_epochs) -> None:
         progress_bar = tqdm(range(num_epochs), desc=f'{self.name} in its 0/{num_epochs} epoch in Global Epoch {self.global_epochs_completed}/{self.gepochs}')
-
+        torch.cuda.empty_cache()
 
         for i in progress_bar:
             progress_bar.set_description(f'{self.name} in its {i}/{num_epochs} epoch in Global Epoch {self.global_epochs_completed}/{self.gepochs}')
@@ -204,7 +204,7 @@ class FedAvgClient(BaseClient):
         
         self.global_epochs_completed += 1
 
-
+        torch.cuda.empty_cache()
         return 
 
     

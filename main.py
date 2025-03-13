@@ -16,29 +16,34 @@ from torch.utils.tensorboard import SummaryWriter
 from utils import load_json, dataset_normalization_values
 from data_dist import distribute_data_iid, distribute_data_dirichilet
 from models import Resnet18_model
+from client import FedAvgClient
 
 #paths
 cwd = os.getcwd()
 data_dir = f'{cwd}/data'
 main_cfg_path = f'{cwd}/configs/experiment_config.json'
 
+#made a cfg to be given to the server for better usage....as complexity grows, keep adding cfg paths here
+all_cfgs = {
+    'main' : main_cfg_path
+}
+
 
 
 main_cfg = load_json(main_cfg_path)
 print(main_cfg)
 
-# loading exp variables
-dataset_name = main_cfg['dataset']
-seed = main_cfg['seed']
-distribution  = main_cfg['dist']
-shuffle = main_cfg['shuffle']
-model_name = main_cfg['model']
-device=main_cfg['device']
-save = main_cfg['save']
-ratio = main_cfg['ratio']
-training_config_file_path = main_cfg['training']
-num_clients = main_cfg['clients']
-
+dataset_name = main_cfg.get("dataset", "cifar10")
+seed = main_cfg.get("seed", 69)
+distribution = main_cfg.get("dist", "iid")
+shuffle = main_cfg.get("shuffle", True)
+model_name = main_cfg.get("model", "resnet")
+device = main_cfg.get("device", "cuda")
+save = main_cfg.get("save", False)
+ratio = main_cfg.get("ratio", 0.9)
+training_config_file_path = main_cfg.get("training", "")
+num_clients = main_cfg.get("clients", 5)
+all_cfgs['train'] = training_config_file_path
 
 # exp_name = '-'.join([f'{key}-{value}' for key, value in vars(args).items()])
 
@@ -48,6 +53,8 @@ np.random.seed(seed)
 
 # torch.manual_seed(seed)
 # np.random.seed(seed)
+
+client_id_name_map = {f'C{i}' : f'Client-{i}' for i in range(num_clients)} # this is redundant for now...will use it for better purposes later
 
 if dataset_name == 'cifar10' : 
     dataset = torchvision.datasets.CIFAR10(
@@ -111,6 +118,20 @@ models = {
                        num_classes=num_classes
                        ) for i in range(num_clients)
 }
+
 print('Models Initialized')
 
 
+clients = {client_id : FedAvgClient(name=client_id_name_map[client_id],
+                                    id=client_id,
+                                    dataset=datasets[ind],
+                                    device=device,
+                                    model=models[ind],
+                                    ratio=ratio,
+                                    shuffle=shuffle,
+                                    train_config=training_config_file_path
+                                    ) for ind, client_id in enumerate(client_id_name_map.keys())
+           }
+
+
+print('Clients have been initalized')
