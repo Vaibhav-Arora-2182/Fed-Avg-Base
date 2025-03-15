@@ -13,7 +13,7 @@ import torch.nn as nn
 from torch.optim import Adam, SGD
 from tqdm import tqdm
 
-from utils.utils import load_json
+from utils.generic import load_json
 from clients.base import BaseClient
 
 
@@ -143,17 +143,3 @@ class FedAvgClient(BaseClient):
 
         torch.cuda.empty_cache()
         return 
-
-    
-
-
-    
-
-client = FedAvgClient(name = 'test_client',
-                      id = "Meow",
-                      dataset=torchvision.datasets.CIFAR10('data/CIFAR10', transform=torchvision.transforms.ToTensor()),
-                      model = torchvision.models.resnet18(), 
-                      ratio=0.9, 
-                      shuffle=True,
-                      train_config='configs/fedavg_training_config.json', 
-                      device='cuda')

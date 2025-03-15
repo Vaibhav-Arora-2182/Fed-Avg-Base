@@ -8,7 +8,7 @@ from copy import deepcopy
 
 from abc import ABC
 from tqdm import tqdm
-from utils.utils import load_json
+from utils.generic import load_json
 from typing import Dict
 from clients.fedavg import BaseClient, FedAvgClient
 from servers.base import BaseServer

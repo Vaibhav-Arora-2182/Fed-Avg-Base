@@ -8,7 +8,7 @@ from copy import deepcopy
 
 from abc import ABC
 from tqdm import tqdm
-from utils.utils import load_json
+from utils.generic import load_json
 from typing import Dict
 from clients.fedavg import BaseClient, FedAvgClient
 
@@ -27,6 +27,7 @@ class BaseServer(ABC):
         self.configs = configs
         self.model = deepcopy(model)
         self.model.apply(lambda m: m.reset_parameters() if hasattr(m, 'reset_parameters') else None)
+        self.exp_name = ''
 
     def train_clients(self):
         print("Write the process for training clients here using client functions")

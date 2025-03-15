@@ -13,7 +13,7 @@ from torch.utils.data import Dataset, Subset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 
-from utils.utils import load_json, dataset_normalization_values
+from utils.generic import load_json, dataset_normalization_values
 from datafactory.dirichilet_dist import distribute_data_dirichilet
 from datafactory.iid_dist import distribute_data_iid
 
