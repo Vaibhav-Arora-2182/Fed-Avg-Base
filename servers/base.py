@@ -8,9 +8,9 @@ from copy import deepcopy
 
 from abc import ABC
 from tqdm import tqdm
-from utils import load_json
+from utils.utils import load_json
 from typing import Dict
-from client import BaseClient, FedAvgClient
+from clients.fedavg import BaseClient, FedAvgClient
 
 
 class BaseServer(ABC):
@@ -20,6 +20,7 @@ class BaseServer(ABC):
                  configs : Dict[str, str],
                  model : torch.nn.Module
                 ):
+        super().__init__()
         
         self.aggregation_strategy = aggregation_startegy
         self.clients = clients
@@ -42,11 +43,3 @@ class BaseServer(ABC):
     def logger(self):
         print('Use the logger modules to obtain the desired results from clients')
         return
-    
-
-
-
-
-class FedAvgServer(BaseServer):
-    def __init__(self, aggregation_startegy, clients, configs, model):
-        super().__init__(aggregation_startegy, clients, configs, model)

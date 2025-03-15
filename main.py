@@ -13,10 +13,12 @@ from torch.utils.data import Dataset, Subset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 
-from utils import load_json, dataset_normalization_values
-from data_dist import distribute_data_iid, distribute_data_dirichilet
-from models import Resnet18_model
-from client import FedAvgClient
+from utils.utils import load_json, dataset_normalization_values
+from datafactory.dirichilet_dist import distribute_data_dirichilet
+from datafactory.iid_dist import distribute_data_iid
+
+from models.resnet18 import Resnet18_model
+from clients.fedavg import FedAvgClient
 
 #paths
 cwd = os.getcwd()

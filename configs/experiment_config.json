@@ -8,7 +8,7 @@
     "ratio": 0.9,
     "device": "cuda",
     "save": false,
-    "training" : "configs/fedavg_training_config.json"
+    "training" : "configs/fedavg/fedavg_training_config.json"
 
   }
   
