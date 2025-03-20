@@ -9,25 +9,29 @@ from copy import deepcopy
 from abc import ABC
 from tqdm import tqdm
 from utils.generic import load_json
-from typing import Dict
+from typing import Dict, Union
 from clients.fedavg import BaseClient, FedAvgClient
 
 
 class BaseServer(ABC):
     def __init__(self,
-                 aggregation_startegy : str,
                  clients : Dict[str, BaseClient],
                  configs : Dict[str, str],
-                 model : torch.nn.Module
+                 model : torch.nn.Module,
+                 data : Union[torch.utils.data.Dataset, None],
+                 device : Union[str, torch.device]
                 ):
         super().__init__()
         
-        self.aggregation_strategy = aggregation_startegy
         self.clients = clients
         self.configs = configs
         self.model = deepcopy(model)
         self.model.apply(lambda m: m.reset_parameters() if hasattr(m, 'reset_parameters') else None)
         self.exp_name = ''
+        self.data = data
+        self.device = device
+
+        self.set_exp_name()
 
     def train_clients(self):
         print("Write the process for training clients here using client functions")
@@ -44,3 +48,8 @@ class BaseServer(ABC):
     def logger(self):
         print('Use the logger modules to obtain the desired results from clients')
         return
+    
+    def set_exp_name(self) -> str:
+        print("Write a small function to create create identifier for individual experiments")
+        return ''
+    

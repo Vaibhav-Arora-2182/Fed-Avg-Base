@@ -21,6 +21,7 @@ class FedAvgAggregator(BaseAggregator):
                  clients : Iterable[FedAvgClient],
                  server : BaseServer,
                  device : Union[str, torch.device]
+                 
                  ):
         super().__init__(clients, server, device)
 
@@ -63,7 +64,7 @@ class FedAvgAggregator(BaseAggregator):
 
 
                 
-            epoch_metrics = self.gloabl_eval()
+            epoch_metrics = self._gloabl_eval()
             
             metrics["Loss"] += [epoch_metrics["Loss"]]
             metrics["Accuracy"] += [epoch_metrics["Accuracy"]]

@@ -33,7 +33,7 @@ class BaseAggregator(ABC):
         print('Write Aggregation logic here ')
         return
     
-    def gloabl_eval(self):
+    def _gloabl_eval(self):
         metrics = {
             'Accuracy' : 0,
             'Loss' : 0
