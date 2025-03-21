@@ -14,7 +14,7 @@ from utils.generic import load_json, parse_json_recursively
 from clients.fedavg import BaseClient, FedAvgClient
 from servers.base import BaseServer
 from aggregators.fedavg import FedAvgAggregator
-
+        
 class FedAvgServer(BaseServer):
     def __init__(self,
                  clients : Dict[str, BaseClient],
