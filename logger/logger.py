@@ -37,7 +37,7 @@ class Logger:
     
     def add_metrics(self, keys : Iterable[str]):
         for key in keys : 
-            if key not in self.monitored_metrics_ctr[keys] : self.monitored_metrics_ctr[key] = 0
+            if key not in self.monitored_metrics_ctr.keys() : self.monitored_metrics_ctr[key] = 0
         return
 
 

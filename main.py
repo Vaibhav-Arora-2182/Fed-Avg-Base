@@ -19,6 +19,7 @@ from datafactory.iid_dist import distribute_data_iid
 
 from models.resnet18 import Resnet18_model
 from clients.fedavg import FedAvgClient
+from servers.fedavg import FedAvgServer
 
 #paths
 cwd = os.getcwd()
@@ -45,6 +46,7 @@ save = main_cfg.get("save", False)
 ratio = main_cfg.get("ratio", 0.9)
 training_config_file_path = main_cfg.get("training", "")
 num_clients = main_cfg.get("clients", 5)
+
 all_cfgs['train'] = training_config_file_path
 
 # exp_name = '-'.join([f'{key}-{value}' for key, value in vars(args).items()])
@@ -137,3 +139,21 @@ clients = {client_id : FedAvgClient(name=client_id_name_map[client_id],
 
 
 print('Clients have been initalized')
+
+
+server = FedAvgServer(clients=clients,
+                      configs=all_cfgs,
+                      model_sample=list(models.values())[-1],
+                      data=None, 
+                      device=device
+                      )
+train_config = load_json(training_config_file_path)
+
+server.aggregate(
+    num_global_epochs=train_config.get('num_global_epochs', 10),
+    num_local_epochs=train_config.get('num_local_epochs', 20),
+    save=save,
+    save_step=1
+)
+
+

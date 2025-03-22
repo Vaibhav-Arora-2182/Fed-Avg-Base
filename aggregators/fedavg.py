@@ -7,7 +7,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from copy import copy, deepcopy
 from typing import Dict, List, Tuple, Iterable
-from servers.fedavg import BaseServer, FedAvgServer
 from clients.fedavg import BaseClient, FedAvgClient
 from aggregators.base import BaseAggregator
 from tqdm import tqdm
@@ -19,11 +18,10 @@ from typing import Union
 class FedAvgAggregator(BaseAggregator):
     def __init__(self,
                  clients : Iterable[FedAvgClient],
-                 server : FedAvgServer,
                  device : Union[str, torch.device]
                   
                  ):
-        super().__init__(clients, server, device)
+        super().__init__(clients, device)
 
     def aggregate(self):
         
@@ -48,9 +46,11 @@ class FedAvgAggregator(BaseAggregator):
         #updating client models 
         for client in self.clients : client.update_model(global_model_state_dict)   
         epoch_metrics = self._gloabl_eval()
+
         
         metrics["Loss"] += [epoch_metrics["Loss"]]
         metrics["Accuracy"] += [epoch_metrics["Accuracy"]]
         # progress_bar.set_description(f'Number of Global rounds compeleted : {i}/{global_rounds}')
+        
 
         return metrics, global_model_state_dict

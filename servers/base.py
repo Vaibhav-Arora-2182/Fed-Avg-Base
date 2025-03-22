@@ -17,7 +17,7 @@ class BaseServer(ABC):
     def __init__(self,
                  clients : Dict[str, BaseClient],
                  configs : Dict[str, str],
-                 model : torch.nn.Module,
+                 model_sample : torch.nn.Module,
                  data : Union[torch.utils.data.Dataset, None],
                  device : Union[str, torch.device]
                 ):
@@ -25,7 +25,7 @@ class BaseServer(ABC):
         
         self.clients = clients
         self.configs = configs
-        self.model = deepcopy(model)
+        self.model = deepcopy(model_sample)
         self.model.apply(lambda m: m.reset_parameters() if hasattr(m, 'reset_parameters') else None)
         self.exp_name = ''
         self.data = data
