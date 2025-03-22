@@ -5,7 +5,7 @@ from typing import Iterable, Dict, Any
 
 class Logger:
     def __init__(self, exp_name):
-        self.writer = SummaryWriter(log_dir=exp_name)
+        self.writer = SummaryWriter(log_dir=f'tensorboard/{exp_name}')
         self.monitored_metrics_ctr = {}
 
     def update_scaler(self,
