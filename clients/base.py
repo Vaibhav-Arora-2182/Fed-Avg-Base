@@ -52,6 +52,7 @@ class BaseClient(ABC):
         self._parse_train_config()
         self.train_loader, self.test_loader = self._split_data()
         # self.local_train(5)
+        self.logger = None
 
 
 

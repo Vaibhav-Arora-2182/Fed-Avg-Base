@@ -28,6 +28,7 @@ class BaseAggregator(ABC):
         self.server = server
         self.device = device
         self.start_time = time()
+        self.logger = None
 
     def aggregate(self):
         print('Write Aggregation logic here ')
