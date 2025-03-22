@@ -45,7 +45,7 @@ class BaseServer(ABC):
         print('Write the model distributing logic')
         return
     
-    def logger(self):
+    def init_logger(self):
         print('Use the logger modules to obtain the desired results from clients')
         return
     

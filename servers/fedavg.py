@@ -30,7 +30,7 @@ class FedAvgServer(BaseServer):
         self.aggregator = FedAvgAggregator(clients=self.clients.values(),
                                            server=self,
                                            device=self.device)
-        self.logger()
+        self.init_logger()
 
         
 
@@ -48,11 +48,12 @@ class FedAvgServer(BaseServer):
         for client in self.clients.values() : client.update_model(model=model)
         return 
     
-    def logger(self):
+    def init_logger(self):
         self.logger = Logger(exp_name=self.exp_name)
         self.aggregator.logger = self.logger
         for client in self.clients.values() : client.logger =  self.logger 
-        # Add metrics here
+        self.logger.add_metrics(["global_avg_accuracy", "global_avg_loss"])
+        self.logger.add_metrics([f'{client.name}_loss' for client in self.clients.values()] + [f'{client.name}_accuracy' for client in self.clients.values()])
 
     def aggregate(self,
                   num_global_epochs : int,
