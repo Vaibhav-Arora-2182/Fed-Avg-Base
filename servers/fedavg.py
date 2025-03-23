@@ -67,7 +67,8 @@ class FedAvgServer(BaseServer):
         self.aggregator.logger = self.logger
         for client in self.clients.values() : client.logger =  self.logger 
         self.logger.add_metrics(["global_avg_accuracy", "global_avg_loss"])
-        self.logger.add_metrics([f'{client.name}_loss' for client in self.clients.values()] + [f'{client.name}_accuracy' for client in self.clients.values()])
+        self.logger.add_metrics([f'{client.name}_train_loss' for client in self.clients.values()] + [f'{client.name}_train_accuracy' for client in self.clients.values()])
+        self.logger.add_metrics([f'{client.name}_test_loss' for client in self.clients.values()] + [f'{client.name}_test_accuracy' for client in self.clients.values()])
 
     def aggregate(self,
                   num_global_epochs : int,
@@ -89,13 +90,16 @@ class FedAvgServer(BaseServer):
             progress_bar.set_description(f'Number of Global rounds compeleted : {i}/{num_global_epochs}')
 
 
-            client_train_accuracies = {client.name: client.metrics['train_accuracies'][-num_local_epochs-1:] for client in self.clients.values()}
-            client_test_accuracies = {client.name: client.metrics['test_accuracies'][-num_local_epochs-1:] for client in self.clients.values()}
-            client_train_loss = {client.name: client.metrics['train_losses'][-num_local_epochs-1:] for client in self.clients.values()}
-            client_test_loss = {client.name: client.metrics['test_losses'][-num_local_epochs-1:] for client in self.clients.values()}
+            client_train_accuracies = {f'{client.name}_train_accuracy': np.array(client.metrics['train_accuracies'][-num_local_epochs-1:]) for client in self.clients.values()}
+            client_test_accuracies = {f'{client.name}_test_accuracy': np.array(client.metrics['test_accuracies'][-num_local_epochs-1:]) for client in self.clients.values()}
+            client_train_loss = {f'{client.name}_train_loss': np.array(client.metrics['train_losses'][-num_local_epochs-1:]) for client in self.clients.values()}
+            client_test_loss = {f'{client.name}_test_loss': np.array(client.metrics['test_losses'][-num_local_epochs-1:]) for client in self.clients.values()}
+
+            
             
             self.logger.update_scaler('global_avg_accuracy', [metrics['Accuracy'][-1]])
             self.logger.update_scaler('global_avg_loss', [metrics['Loss'][-1]])
+
             self.logger.update_scalers("Client_train_Accuracies", client_train_accuracies)
             self.logger.update_scalers("Client_test_Accuracies", client_test_accuracies)
             self.logger.update_scalers("Client_train_losses", client_train_loss)

@@ -90,7 +90,7 @@ class BaseClient(ABC):
         self.model.eval()
         self.model.to(self.device)
 
-        if dataset : dataloader = dataloader(dataset, batch_size=self.batch_size, shuffle=self.shuffle)
+        if dataset : dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=self.shuffle)
         else : dataloader = self.test_loader
 
         test_loss, test_correct, test_total = 0, 0, 0

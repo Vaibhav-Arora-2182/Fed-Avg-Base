@@ -1,7 +1,7 @@
 {
     "learning_rate" : 0.01,
     "optimizer" : "Adam",
-    "num_local_epochs" : 20,
+    "num_local_epochs" : 30,
     "num_global_epochs" : 10,
     "optimizer_params" : {
                             "b1" : 0.9,
@@ -10,6 +10,6 @@
                             "weight_decay" : 0,
                             "amsgrad" : false
                             },
-    "batch_size" : 64,
+    "batch_size" : 512,
     "loss" : "CE"
 }
