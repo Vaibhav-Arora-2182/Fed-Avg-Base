@@ -24,8 +24,6 @@ class FedAvgAggregator(BaseAggregator):
         super().__init__(clients, device)
 
     def aggregate(self):
-        
-        # progress_bar = tqdm(range(global_rounds+1), desc=f'Number of Global rounds compeleted : 0/{global_rounds}') 
 
         metrics = {
             'Loss' : [],
@@ -50,7 +48,6 @@ class FedAvgAggregator(BaseAggregator):
         
         metrics["Loss"] += [epoch_metrics["Loss"]]
         metrics["Accuracy"] += [epoch_metrics["Accuracy"]]
-        # progress_bar.set_description(f'Number of Global rounds compeleted : {i}/{global_rounds}')
         
 
         return metrics, global_model_state_dict

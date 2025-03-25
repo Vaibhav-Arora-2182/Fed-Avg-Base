@@ -1,7 +1,7 @@
 {
     "learning_rate" : 0.01,
     "optimizer" : "Adam",
-    "num_local_epochs" : 30,
+    "num_local_epochs" : 25,
     "num_global_epochs" : 10,
     "optimizer_params" : {
                             "b1" : 0.9,

@@ -40,7 +40,7 @@ class FedAvgServer(BaseServer):
         main_cfg_data = load_json(main_cfg)
         exp_name = parse_json_recursively(main_cfg_data)
 
-        print(exp_name)
+        # print(exp_name)
 
         dataset = exp_name.get('dataset', '')
         seed = exp_name.get('seed', '')
@@ -69,7 +69,8 @@ class FedAvgServer(BaseServer):
         self.logger.add_metrics(["global_avg_accuracy", "global_avg_loss"])
         self.logger.add_metrics([f'{client.name}_train_loss' for client in self.clients.values()] + [f'{client.name}_train_accuracy' for client in self.clients.values()])
         self.logger.add_metrics([f'{client.name}_test_loss' for client in self.clients.values()] + [f'{client.name}_test_accuracy' for client in self.clients.values()])
-
+        # print(self.logger.monitored_metrics_ctr)
+        
     def aggregate(self,
                   num_global_epochs : int,
                   num_local_epochs : int,
@@ -77,7 +78,7 @@ class FedAvgServer(BaseServer):
                   save_step : int = 1
                   ):
         
-        progress_bar = tqdm(range(num_global_epochs+1), desc=f'Number of Global rounds compeleted : 0/{num_global_epochs}')
+        progress_bar = tqdm(range(num_global_epochs+1), desc=f'Number of Global rounds compeleted : 0/{num_global_epochs}', leave=False)
         
         for i in progress_bar :
             torch.cuda.empty_cache()
@@ -104,6 +105,8 @@ class FedAvgServer(BaseServer):
             self.logger.update_scalers("Client_test_Accuracies", client_test_accuracies)
             self.logger.update_scalers("Client_train_losses", client_train_loss)
             self.logger.update_scalers("Client_test_losses", client_test_loss)
+            # print(self.logger.monitored_metrics_ctr)
+
             torch.cuda.empty_cache()
 
         

@@ -2,7 +2,7 @@
     "dataset": "cifar10",
     "seed": 69,
     "dist": "dirichilet",
-    "clients": 5,
+    "clients": 10,
     "shuffle": true,
     "model": "resnet",
     "ratio": 0.9,

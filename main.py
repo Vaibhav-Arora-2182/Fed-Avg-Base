@@ -18,6 +18,7 @@ from datafactory.dirichilet_dist import distribute_data_dirichilet
 from datafactory.iid_dist import distribute_data_iid
 
 from models.resnet18 import Resnet18_model
+from models.cnn import CNN
 from clients.fedavg import FedAvgClient
 from servers.fedavg import FedAvgServer
 
@@ -34,7 +35,7 @@ all_cfgs = {
 
 
 main_cfg = load_json(main_cfg_path)
-print(main_cfg)
+# print(main_cfg)
 
 dataset_name = main_cfg.get("dataset", "cifar10")
 seed = main_cfg.get("seed", 69)
@@ -96,7 +97,7 @@ num_classes = len(dataset.classes)
 
 if distribution == 'dirichilet' :
     
-    alphas = [0.5 for _ in range(num_clients)]  # change this for testing with various alphas
+    alphas = [0.1 for _ in range(num_clients)]  # change this for testing with various alphas
     
     datasets = distribute_data_dirichilet(
         dataset=dataset, 
@@ -118,7 +119,7 @@ print('Data Distribution is done')
 
 
 models = {
-    i : Resnet18_model(in_channels=dataset.data.shape[-1], 
+    i : CNN(in_channels=dataset.data.shape[-1], 
                        num_classes=num_classes
                        ) for i in range(num_clients)
 }

@@ -46,6 +46,9 @@ def distribute_data_iid(
         for client_no, n_data in enumerate(label_dist):
             client_ind_map[client_no] += indices[start_idx : start_idx + n_data]
             start_idx += n_data
+    
+    # for i in client_ind_map :
+    #     print(len(client_ind_map[i]))
 
     datasets = { client_no : Subset(dataset, ind ) for client_no, ind in zip (client_ind_map.keys(), client_ind_map.values())}
 

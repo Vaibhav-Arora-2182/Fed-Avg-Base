@@ -21,12 +21,22 @@ class FedAvgClient(BaseClient):
 
     def __init__(self, name, id, dataset, device, model, ratio, shuffle, train_config):
         super().__init__(name, id, dataset, device, model, ratio, shuffle, train_config)
+        # print(self.train_loader, self.test_loader, self.name)
+        # print(f"🔍 {self.name}: Train loader batches: {len(self.train_loader)}, Test loader batches: {len(self.test_loader)}")
+
+        # for batch in self.train_loader:
+        #     print(f"📝 {self.name}: Train batch size: {batch[0].shape}, Labels: {batch[1].shape}")
+        #     break  # Just print the first batch
+        self.progress_bar = tqdm(range(self.gepochs*self.lepochs), leave=False)
+
 
     
     def _split_data(self):
         train_size = int(self.ratio* len(self.dataset))
         test_size = len(self.dataset) - train_size
         self.train_data, self.test_data = random_split(dataset=self.dataset, lengths=[train_size, test_size])
+        
+        while self.batch_size > 1 and train_size // self.batch_size == 0: self.batch_size //= 2 
 
         train_loader = DataLoader(dataset=self.train_data,
                                   batch_size=self.batch_size,
@@ -83,26 +93,28 @@ class FedAvgClient(BaseClient):
             self.loss = nn.CrossEntropyLoss()
         else :
             raise ValueError('Loss not passed correctly')
-
+        
 
 
         return 
     
     def local_train(self, num_epochs) -> None:
-        progress_bar = tqdm(range(num_epochs), desc=f'{self.name} in its 0/{num_epochs} epoch in Global Epoch {self.global_epochs_completed}/{self.gepochs}')
+        # progress_bar = tqdm(range(num_epochs), desc=f'{self.name} in its 0/{num_epochs} epoch in Global Epoch {self.global_epochs_completed}/{self.gepochs}')
         torch.cuda.empty_cache()
 
-        for i in progress_bar:
-            progress_bar.set_description(f'{self.name} in its {i+1}/{num_epochs} epoch in Global Epoch {self.global_epochs_completed}/{self.gepochs}')
+        for i in range(num_epochs):
+            self.progress_bar.set_description(f'{self.name} in its {self.local_epochs_completed + i+1}/{self.gepochs*self.lepochs} epoch in Global Epoch {self.global_epochs_completed}/{self.gepochs}')
             self.model = self.model.to(self.device)
 
             self.model.train()
             train_loss, train_correct, train_total =  0, 0, 0
 
+
             # training 
             for inputs, labels in self.train_loader : 
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
                 self.optimizer.zero_grad()
+                # print(inputs.device, next(self.model.parameters()).device)
                 outputs = self.model(inputs)
                 loss = self.loss(outputs, labels)
                 loss.backward()
@@ -112,7 +124,8 @@ class FedAvgClient(BaseClient):
                 _, predicted = outputs.max(1)
                 train_total += labels.shape[0]
                 train_correct += predicted.eq(labels).sum().item()
-                torch.cuda.empty_cache()
+                # print(train_correct, train_total, labels.shape)
+
                 
             self.local_epochs_completed += 1
             
