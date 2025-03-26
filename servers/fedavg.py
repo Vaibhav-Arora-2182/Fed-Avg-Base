@@ -78,7 +78,7 @@ class FedAvgServer(BaseServer):
                   save_step : int = 1
                   ):
         
-        progress_bar = tqdm(range(num_global_epochs+1), desc=f'Number of Global rounds compeleted : 0/{num_global_epochs}', leave=False)
+        progress_bar = tqdm(range(num_global_epochs+1), desc=f'Number of Global rounds compeleted : 0/{num_global_epochs}', leave=True)
         
         for i in progress_bar :
             torch.cuda.empty_cache()
