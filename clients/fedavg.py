@@ -98,7 +98,7 @@ class FedAvgClient(BaseClient):
 
         return 
     
-    def local_train(self, num_epochs) -> None:
+    def local_train(self, num_epochs, logger) -> None:
         # progress_bar = tqdm(range(num_epochs), desc=f'{self.name} in its 0/{num_epochs} epoch in Global Epoch {self.global_epochs_completed}/{self.gepochs}')
         torch.cuda.empty_cache()
 
@@ -126,8 +126,9 @@ class FedAvgClient(BaseClient):
                 train_correct += predicted.eq(labels).sum().item()
                 # print(train_correct, train_total, labels.shape)
 
-                
-            self.local_epochs_completed += 1
+            train_accuracy = (train_correct/ train_total)*100
+            logger.logger.log({f'{self.name}_train_accuracy': train_accuracy})
+            logger.logger.log({f'{self.name}_train_loss': train_loss})
             
             #testing
             test_loss, test_correct, test_total = 0, 0, 0
@@ -149,8 +150,12 @@ class FedAvgClient(BaseClient):
             self.metrics['train_losses'] += [train_loss]
 
             test_accuracy = (test_correct/test_total)*100
+            
+            logger.logger.log({f'{self.name}_test_accuracy': test_accuracy})
+            logger.logger.log({f'{self.name}_test_loss': test_loss})
             self.metrics['test_accuracies'] += [test_accuracy]
             self.metrics['test_losses'] += [test_loss]
+            self.local_epochs_completed += 1
         
         self.global_epochs_completed += 1
 

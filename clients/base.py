@@ -27,7 +27,7 @@ class BaseClient(ABC):
                  model : nn.Module,
                  ratio : float,
                  shuffle : Union[torch.device, bool],
-                 train_config : str
+                 train_config : str,
                  ) -> None:
         super().__init__()
 

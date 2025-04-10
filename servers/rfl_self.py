@@ -12,14 +12,15 @@ from typing import Dict, Union, List
 import os
 
 from utils.generic import load_json, parse_json_recursively
-from clients.fedavg import BaseClient, FedAvgClient
+from clients.rfl_self import RFL_SelfClient
 from servers.base import BaseServer
-from aggregators.fedavg import FedAvgAggregator
+from aggregators.rfl_self import RFL_SelfAggregator
 from logger.logger import Logger
+# import param
         
-class FedAvgServer(BaseServer):
+class RFL_SelfServer(BaseServer):
     def __init__(self,
-                 clients : Dict[str, FedAvgClient],
+                 clients : Dict[str, RFL_SelfClient],
                  configs : Dict[str, str],
                  model_sample : torch.nn.Module,
                  data : Union[torch.utils.data.Dataset, None],
@@ -27,7 +28,7 @@ class FedAvgServer(BaseServer):
                  ):
         super().__init__(clients, configs, model_sample, data, device)
 
-        self.aggregator = FedAvgAggregator(clients=self.clients.values(),
+        self.aggregator = RFL_SelfAggregator(clients=self.clients.values(),
                                            device=self.device)
         self.init_logger()
 
@@ -52,11 +53,11 @@ class FedAvgServer(BaseServer):
         optimizer = exp_name.get('training-optimizer', '')
         batch_size = exp_name.get('training-batch_size', '')
 
-        self.exp_name = f'FedAvg_{dataset}_{model}_seed{seed}_clients{clients}_dist{dist}_lr{lr}_opt{optimizer}_bs{batch_size}'
+        self.exp_name = f'RFLSelf_{dataset}_{model}_seed{seed}_clients{clients}_dist{dist}_lr{lr}_opt{optimizer}_bs{batch_size}'
         
 
     def train_clients(self, local_epochs, logger) : 
-        for client in self.clients.values() : client.local_train(local_epochs, logger)
+        for client in self.clients.values() : client.local_train(local_epochs, logger=logger)
     
     def distribute_models(self, model : Union[torch.nn.Module, dict]) -> None:
         for client in self.clients.values() : client.update_model(model=model)
@@ -71,6 +72,15 @@ class FedAvgServer(BaseServer):
         # self.logger.add_metrics([f'{client.name}_test_loss' for client in self.clients.values()] + [f'{client.name}_test_accuracy' for client in self.clients.values()])
         # print(self.logger.monitored_metrics_ctr)
         
+        
+    # def calculate_beta(self):
+    #         beta = torch.rand(1)
+    #         for client in self.clients.values():
+    #             for param in client.model.parameters():
+    #                 param.data = param.data * beta
+            
+        # return 
+        
     def aggregate(self,
                   num_global_epochs : int,
                   num_local_epochs : int,
@@ -82,7 +92,8 @@ class FedAvgServer(BaseServer):
         
         for i in progress_bar :
             torch.cuda.empty_cache()
-            self.train_clients(local_epochs=num_local_epochs, logger=self.logger)
+            self.train_clients(local_epochs=num_local_epochs, logger = self.logger)
+            
             metrics, model = self.aggregator.aggregate()
             if save and ((i%save_step) == 1) : 
                 os.makedirs(f'saved/models{self.exp_name}_time_{self.aggregator.start_time}', exist_ok=True)
@@ -108,7 +119,6 @@ class FedAvgServer(BaseServer):
             # self.logger.update_scalers("Client_test_Accuracies", client_test_accuracies)
             # self.logger.update_scalers("Client_train_losses", client_train_loss)
             # self.logger.update_scalers("Client_test_losses", client_test_loss)
-            # print(self.logger.monitored_metrics_ctr)
 
             torch.cuda.empty_cache()
 

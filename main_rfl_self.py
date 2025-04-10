@@ -119,7 +119,7 @@ print('Data Distribution is done')
 
 
 models = {
-    i : CNN(in_channels=dataset.data.shape[-1], 
+    i : Resnet18_model(in_channels=dataset.data.shape[-1], 
                        num_classes=num_classes
                        ) for i in range(num_clients)
 }
@@ -140,6 +140,11 @@ clients = {client_id : RFL_SelfClient(name=client_id_name_map[client_id],
 
 
 print('Clients have been initalized')
+print(list(clients.keys()))
+selfish_id = np.random.choice(a=list(clients.keys()), size=1)[0]
+clients[selfish_id].set_selfish(0.5)
+print(f'{selfish_id} is selfish')
+
 
 
 server = RFL_SelfServer(clients=clients,
