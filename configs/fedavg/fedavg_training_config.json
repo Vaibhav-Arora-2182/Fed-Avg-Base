@@ -10,6 +10,6 @@
                             "weight_decay" : 0,
                             "amsgrad" : false
                             },
-    "batch_size" : 512,
+    "batch_size" : 1024,
     "loss" : "CE"
 }

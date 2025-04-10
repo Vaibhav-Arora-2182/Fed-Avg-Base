@@ -19,10 +19,13 @@ from clients.base import BaseClient
 
 class RFL_SelfClient(BaseClient):
 
-    def __init__(self, name, id, dataset, device, model, ratio, shuffle, train_config, is_selfish:bool = False, selfishness:int=0):
+    def __init__(self, name, id, dataset, device, model, ratio, shuffle, train_config,):
         super().__init__(name, id, dataset, device, model, ratio, shuffle, train_config)
         self.progress_bar = tqdm(range(self.gepochs*self.lepochs), leave=False)
-        self.is_selfish = is_selfish
+        self.is_selfish=False
+        
+    def set_selfish(self, selfishness:float):
+        self.is_selfish = True
         if self.is_selfish:
             self.previous_model = self.model
             cwd = os.getcwd()
@@ -103,7 +106,7 @@ class RFL_SelfClient(BaseClient):
 
         return 
     
-    def local_train(self, num_epochs) -> None:
+    def local_train(self, num_epochs, logger) -> None:
         # progress_bar = tqdm(range(num_epochs), desc=f'{self.name} in its 0/{num_epochs} epoch in Global Epoch {self.global_epochs_completed}/{self.gepochs}')
         torch.cuda.empty_cache()
 
@@ -131,8 +134,10 @@ class RFL_SelfClient(BaseClient):
                 train_correct += predicted.eq(labels).sum().item()
                 # print(train_correct, train_total, labels.shape)
 
+            train_accuracy = (train_correct/ train_total)*100
+            logger.logger.log({f'{self.name}_train_accuracy': train_accuracy})
+            logger.logger.log({f'{self.name}_train_loss': train_loss})
                 
-            self.local_epochs_completed += 1
             
             #testing
             test_loss, test_correct, test_total = 0, 0, 0
@@ -149,30 +154,33 @@ class RFL_SelfClient(BaseClient):
                     test_correct += predicted.eq(labels).sum().item()
                     torch.cuda.empty_cache()
 
-            train_accuracy = (train_correct/ train_total)*100
             self.metrics['train_accuracies'] += [train_accuracy]
             self.metrics['train_losses'] += [train_loss]
+            
+            
 
             test_accuracy = (test_correct/test_total)*100
             self.metrics['test_accuracies'] += [test_accuracy]
             self.metrics['test_losses'] += [test_loss]
+            logger.logger.log({f'{self.name}_test_accuracy': test_accuracy})
+            logger.logger.log({f'{self.name}_test_loss': test_loss})
         
+            self.local_epochs_completed += 1
         self.global_epochs_completed += 1
 
         torch.cuda.empty_cache()
         
         if self.is_selfish:
-            delta_k_without_s = []
             if self.delta_hat_s is None:
                 self.delta_hat_s = []
                 for ((_, cur_weights), (_, prev_weights)) in zip(self.model.named_parameters(), self.previous_model.named_parameters()):
-                    delta_hat_t_k_minus_s = (self.k*(cur_weights - prev_weights)) / (self.k - 1)
+                    delta_hat_t_k_minus_s = (self.k*(cur_weights - prev_weights) - cur_weights.grad) / (self.k - 1)
                     deltahat_s = self.selfishness * self.k *(cur_weights.grad - delta_hat_t_k_minus_s) + delta_hat_t_k_minus_s
                     self.delta_hat_s.append(deltahat_s)
                     cur_weights.grad = deltahat_s
             else:
                 for i, ((_, cur_weights), (_, prev_weights)) in enumerate(zip(self.model.named_parameters(), self.previous_model.named_parameters())):
-                    delta_hat_t_k_minus_s = (self.k*(cur_weights - prev_weights) - self.delta) / (self.k - 1)
+                    delta_hat_t_k_minus_s = (self.k*(cur_weights - prev_weights) - self.delta_hat_s[i]) / (self.k - 1)
                     deltahat_s = self.selfishness * self.k *(cur_weights.grad - delta_hat_t_k_minus_s) + delta_hat_t_k_minus_s
                     self.delta_hat_s[i] = deltahat_s
                     cur_weights.grad = deltahat_s
